@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Image as ImageIcon, Loader2, Edit2, Check, X, ShieldAlert, LogOut, Trash2 } from "lucide-react";
 import { Product } from "./HomePage";
 

@@ -5,14 +5,11 @@ import { db } from "./src/db";
 import { products } from "./src/db/schema";
 import { desc, sql } from "drizzle-orm";
 
-async function startServer() {
-  const app = express();
-  const PORT = process.env.PORT || 3000;
+const app = express();
+app.use(express.json());
 
-  app.use(express.json());
-
-  // API Routes
-  app.get("/api/products", async (req, res) => {
+// API Routes
+app.get("/api/products", async (req, res) => {
     try {
       const allProducts = await db.select().from(products).orderBy(desc(products.createdAt));
       res.json(allProducts);
@@ -95,6 +92,8 @@ async function startServer() {
   });
 
   // Vite middleware for development
+async function startServer() {
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -114,4 +113,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
