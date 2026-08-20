@@ -18,6 +18,7 @@ export const createPool = () => {
     if (connectionString) {
       global._postgresPool = new Pool({
         connectionString,
+        ssl: true,
         max: 10,
         idleTimeoutMillis: 30000,
       });

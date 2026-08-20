@@ -11,7 +11,7 @@ export type Product = {
   createdAt: string;
 };
 
-function ProductCard({ product, key }: { product: Product; key?: React.Key }) {
+const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const validImages = product.imageUrls?.filter(url => url.trim() !== "") || [];
   const images = validImages.length > 0 ? validImages : ["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=600"];
