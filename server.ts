@@ -7,7 +7,7 @@ import { desc, sql } from "drizzle-orm";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
   app.use(express.json());
 
@@ -22,19 +22,75 @@ async function startServer() {
     }
   });
 
-  app.post("/api/products", async (req, res) => {
+  // Basic auth middleware
+  const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: "Missing authorization header" });
+    }
+    const base64 = authHeader.split(' ')[1];
+    if (!base64) {
+      return res.status(401).json({ error: "Invalid authorization header" });
+    }
+    const [username, password] = Buffer.from(base64, 'base64').toString().split(':');
+    if (username === 'admin' && password === 'admin1234') {
+      next();
+    } else {
+      res.status(401).json({ error: "Invalid credentials" });
+    }
+  };
+
+  app.post("/api/products", requireAuth, async (req, res) => {
     try {
-      const { name, description, price, imageUrl } = req.body;
+      const { name, description, price, imageUrls, isSoldOut } = req.body;
       const newProduct = await db.insert(products).values({
         name,
         description,
         price: price.toString(),
-        imageUrl,
+        imageUrls: imageUrls || [],
+        isSoldOut: isSoldOut || false,
       }).returning();
       res.status(201).json(newProduct[0]);
     } catch (error) {
       console.error("Error creating product:", error);
       res.status(500).json({ error: "Failed to create product" });
+    }
+  });
+
+  app.put("/api/products/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { name, description, price, imageUrls, isSoldOut } = req.body;
+      const updatedProduct = await db.update(products).set({
+        name,
+        description,
+        price: price ? price.toString() : undefined,
+        imageUrls,
+        isSoldOut,
+      }).where(sql`id = ${id}`).returning();
+      
+      if (updatedProduct.length === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json(updatedProduct[0]);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ error: "Failed to update product" });
+    }
+  });
+
+  app.delete("/api/products/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deletedProduct = await db.delete(products).where(sql`id = ${id}`).returning();
+      
+      if (deletedProduct.length === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(500).json({ error: "Failed to delete product" });
     }
   });
 
@@ -48,7 +104,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*all', (req, res) => {
+    app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
