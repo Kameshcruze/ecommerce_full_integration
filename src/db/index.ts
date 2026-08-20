@@ -12,14 +12,26 @@ declare global {
 
 export const createPool = () => {
   if (!global._postgresPool) {
-    global._postgresPool = new Pool({
-      host: process.env.SQL_HOST,
-      user: process.env.SQL_USER,
-      password: process.env.SQL_PASSWORD,
-      database: process.env.SQL_DB_NAME,
-      max: 10,
-      idleTimeoutMillis: 30000,
-    });
+    // Check if a direct connection string is provided (e.g., from Vercel Postgres, Neon, or Supabase)
+    const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+
+    if (connectionString) {
+      global._postgresPool = new Pool({
+        connectionString,
+        max: 10,
+        idleTimeoutMillis: 30000,
+      });
+    } else {
+      // Fallback to individual components (used internally by AI Studio Cloud SQL)
+      global._postgresPool = new Pool({
+        host: process.env.SQL_HOST,
+        user: process.env.SQL_USER,
+        password: process.env.SQL_PASSWORD,
+        database: process.env.SQL_DB_NAME,
+        max: 10,
+        idleTimeoutMillis: 30000,
+      });
+    }
   }
   return global._postgresPool;
 };
