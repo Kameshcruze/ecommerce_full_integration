@@ -13,7 +13,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             <div className="bg-neutral-900 text-white p-1.5 rounded-lg">
               <Shirt className="w-5 h-5" />
             </div>
-            Delhi T-shirts
+            Ecommerce Testing
           </Link>
           <nav className="flex items-center gap-6">
             <Link to="/" className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors">Shop</Link>
@@ -25,7 +25,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <footer className="bg-white border-t border-neutral-200 py-8 text-center text-sm text-neutral-500">
-        &copy; {new Date().getFullYear()} Delhi T-shirts. All rights reserved.
+        &copy; {new Date().getFullYear()} Ecommerce Testing. All rights reserved.
       </footer>
     </div>
   );

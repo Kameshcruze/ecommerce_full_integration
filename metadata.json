@@ -1,5 +1,5 @@
 {
-  "name": "Delhi T-shirts",
+  "name": "Ecommerce Testing",
   "description": "A global T-shirt store with an admin panel.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
